@@ -2,12 +2,93 @@
 *.slo
 *.lo
 *.o
+*.obj
 
 # Compiled Dynamic libraries
 *.so
+*.so.*
 *.dylib
+*.dll
 
 # Compiled Static libraries
 *.lai
 *.la
+*.lib
 *.a
+
+# Executables
+*.exe
+*.out
+*.app
+
+# ignore auto-generated files
+*_m.h
+*_m.cc
+src/Makefile
+src/Makefile.vc
+/doc/doxy/
+/doc/neddoc/
+/examples/*/results/
+/examples/*/*/results/
+/examples/*/*/*/results/
+/tests/*/work/
+
+# ignore binary files
+out/
+*.pdb
+*.idb
+*.manifest
+.tkenvrc
+
+# ignore backup and temp files
+*.bak
+backups
+*~
+xxx
+/3rdparty
+/tmp/
+
+# ignore Lates files
+*~
+*.acn
+*.acr
+*.alg
+*.aux
+*.bbl
+*.blg
+*.dvi
+*.fdb_latexmk
+*.glg
+*.glo
+*.gls
+*.idx
+*.ilg
+*.ind
+*.ist
+*.lof
+*.lof
+*.lot
+*.lox
+*.maf
+*.mtc
+*.mtc0
+*.nav
+*.nlo
+*.out
+*.pdfsync
+*.ps
+*.snm
+*.synctex
+*.synctex.gz
+*.toc
+*.tcp
+*.tps
+*.undo
+*.vrb
+*.vtc
+*.xdy
+*.tdo
+
+.externalToolBuilders
+.project
+.texlipse
