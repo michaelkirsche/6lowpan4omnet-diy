@@ -1,0 +1,56 @@
+ifndef CONTIKI
+  $(error CONTIKI not defined! You must specify where CONTIKI resides!)
+endif
+
+ifdef UIP_CONF_IPV6
+CFLAGS += -DWITH_UIP6=1
+endif
+
+CONTIKI_TARGET_DIRS = . dev
+CONTIKI_TARGET_MAIN = ${addprefix $(OBJECTDIR)/,contiki-main.o}
+
+CONTIKI_TARGET_SOURCEFILES = contiki-main.c clock.c leds.c leds-arch.c checkpoint-arch.c cfs-posix.c
+
+CONTIKI_SOURCEFILES += $(CONTIKI_TARGET_SOURCEFILES)
+
+.SUFFIXES:
+
+### Define the CPU directory 
+### --> normally a separate directory, we simply copy necessary Makefile commands and files from cpu/native 
+###     and implement our own net driver (located under platform/omnetpp/net)
+CONTIKI_CPU=$(CONTIKI)/platform/omnetpp
+CONTIKI_CPU_DIRS = . net
+
+CONTIKI_SOURCEFILES += mtarch.c rtimer-arch.c elfloader-stub.c symtab.c announcement.c watchdog.c contract.c
+
+### Compiler definitions
+CC       = gcc
+LD       = gcc
+AS       = as
+NM       = nm
+OBJCOPY  = objcopy
+STRIP    = strip
+ifdef WERROR
+CFLAGSWERROR=-Werror -pedantic -std=c99 -Werror
+endif
+### Enable -fPIC to support 64Bit OMNeT++ / INET versions
+CFLAGSNO = -Wall -g -I/usr/local/include $(CFLAGSWERROR) -fPIC
+CFLAGS  += $(CFLAGSNO) -O
+LDFLAGS  = -Wl,-Map=contiki-$(TARGET).map,-export-dynamic
+
+### Compilation rules
+
+%.so: $(OBJECTDIR)/%.o
+	$(LD) -shared -o $@ $^
+
+ifdef CORE
+.PHONY: symbols.c symbols.h
+symbols.c symbols.h:
+	$(NM) -C $(CORE) | grep -v @ | grep -v dll_crt0 | awk -f $(CONTIKI)/tools/mknmlist > symbols.c
+else
+symbols.c symbols.h:
+	cp ${CONTIKI}/tools/empty-symbols.c symbols.c
+	cp ${CONTIKI}/tools/empty-symbols.h symbols.h
+endif
+
+contiki-$(TARGET).a: ${addprefix $(OBJECTDIR)/,symbols.o}
