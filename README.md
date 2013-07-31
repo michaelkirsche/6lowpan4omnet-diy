@@ -6,24 +6,24 @@ This repository contains the [*Integrate It Yourself*](#integrate-it-yourself) v
 
 ## Integrate It Yourself ##
 
-*Integrate It Yourself Version* means that you have to perform the integration of the model in OMNeT++ / INET / Contiki step-by-step by yourself (therefore DIY). An installation and configuration tutorial can be found on [the model's webpage](https://www-rnks.informatik.tu-cottbus.de/~6lowpan4omnet) and in the Wiki page on Github *(coming soon)*.
+*Integrate It Yourself Version* means that you have to perform the integration of the model in OMNeT++ / INET / INETMANET / Contiki step-by-step by yourself (therefore DIY). An installation and configuration tutorial can be found on [the model's webpage](https://www-rnks.informatik.tu-cottbus.de/~6lowpan4omnet) and at the [Wiki page on Github](https://github.com/michaelkirsche/6lowpan4omnet-diy/wiki).
 
 
 ## Directory Structure ##
 
 The directory structure reflects the integration steps, refer to the instruction / installation description for further information.
 
- 1. `contiki_platform_omnet`: includes the OMNeT platform definition for Contiki
- 2. `contiki_adjustments`: includes fixes / patches and adjustments of Contiki for the OMNeT integration
+ 1. `contiki_platform_omnet`: includes the OMNeT++ platform definition for Contiki
+ 2. `contiki_adjustments`: includes fixes / patches and adjustments of Contiki for the OMNeT++ integration
  3. `6lowpan_wrapper`: wrapper for INET and INETMANET
- 4. `examples`: simulation scripts / example simulations for INET and INETMANET
+ 4. `examples`: example simulations for INET and INETMANET
  
 
 ## Releases ##
 
-Support for the initial release #1 is ceased. You can find a download and installation instructions on [the model's webpage](https://www-rnks.informatik.tu-cottbus.de/~6lowpan4omnet).
+Current and future releases will be published in this Github repository in the *Integrate It Yourself* version and in [the *Clone It Yourself* version](https://www-rnks.informatik.tu-cottbus.de/en/node/1445) in the according branches of [my INET/ INETMANET and Contiki clones/branches](https://github.com/michaelkirsche).
 
-Current and future releases will be published in this Github repository in the *Integrate It Yourself* version and in the according branches of [my](https://github.com/michaelkirsche) OMNeT and Contiki repository clones.
+Support for the initial release #1 is ceased. You can find the download link and installation instructions on [the model's webpage](https://www-rnks.informatik.tu-cottbus.de/~6lowpan4omnet).
 
 
 ## Publication ##
