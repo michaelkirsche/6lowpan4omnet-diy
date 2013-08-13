@@ -28,9 +28,9 @@ import inet.world.radio.ChannelControl;
 network NetIPv6over802154
 {
     types:
-        channel C extends DatarateChannel
+        channel C extends ned.DatarateChannel
         {
-            //datarate = 250kbps;
+            datarate = 10Mbps;
             delay = 0.1us;
         }
     submodules:

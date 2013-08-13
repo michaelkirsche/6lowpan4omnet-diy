@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2012 Jonas Hartwig and Michael Kirsche, BTU Cottbus
+// Copyright (C) 2013 Jonas Hartwig and Michael Kirsche, BTU Cottbus
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -39,10 +39,10 @@
 Define_Module(_6lowpan);
 
 #if USE_6LOWPAN
-int _6lowpan::fragmentCount = 0;
-queue< struct _6lowpan::contiki_packet > _6lowpan::packetQueue;
+    int _6lowpan::fragmentCount = 0;
+    queue< struct _6lowpan::contiki_packet > _6lowpan::packetQueue;
 #if DEBUG
-string _6lowpan::artif_payl = "this is my artificial payload which has to be rebuild correctly...0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzythis is my artificial payload which has te be rebuild correctly...";
+    string _6lowpan::artif_payl = "this is my artificial payload which has to be rebuild correctly...0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzy0123456789abcdefghijklmnopqrstuvwxzythis is my artificial payload which has to be rebuild correctly...";
 #endif /* DEBUG */
 #endif /* USE_6LOWPAN */
 
@@ -181,8 +181,8 @@ void _6lowpan::switchContext(int context)
 	}
 	// Set our own MAC address in Contiki if we have one
 	// Check whether 48-Bit or EUI-64-Bit MAC addresses are used
-	// INET 1.x / INETMANET 1.x support only 48-Bit MAC addresses
-	// INET 2.x / INETMANET 2.0 support EUI-64-Bit MAC addresses
+	// INET 1.x & INET 2.x / INETMANET 1.x support only 48-Bit MAC addresses
+	// INETMANET 2.0 support EUI-64-Bit MAC addresses (refer to /linklayer/contract/MACAddress.h)
 	if(!configuration[context]->mac.isUnspecified())
 	{
 	    if(configuration[context]->mac.getAddressSize() == 8)
@@ -395,7 +395,10 @@ void _6lowpan::handleMessageFromHigher(cMessage *msg)
 		// Are we handling an IPv6 paket?
 		if(dynamic_cast<IPv6Datagram*>(msg) != null)
 		{
-			// Register our IPv6 address
+#if DEBUG
+		    printf("...handleMessageFromHigher\n");
+#endif /* DEBUG */
+		    // Register our IPv6 address
 			registerContext(gateIndex);
 			// Recreate the old values
 			switchContext(gateIndex);
@@ -448,7 +451,10 @@ void _6lowpan::handleMessageFromLower(cMessage *msg)
 	{
 		if(dynamic_cast<_6lowpanDatagram*>(msg) != null)
 		{
-			// Restore the old Contiki values
+#if DEBUG
+			printf("...handleMEssageFromLower \n");
+#endif /* DEBUG */
+		    // Restore the old Contiki values
 			switchContext(gateIndex);
 			// Recreate an INET IPv6 packet
 			IPv6Datagram* packet = processLowpanPacket((_6lowpanDatagram*)msg);
@@ -518,9 +524,9 @@ list<cPacket*> _6lowpan::processIPv6Packet(IPv6Datagram* ipPacket, int gateIndex
 
 	// TODO current implementation does not support extension headers :(
 	if(ipPacket->getExtensionHeaderArraySize() > 0)
-	    error("we don't support extension headers yet"); // TODO
+	    error("we don't support extension headers yet");
 
-	//is the transportlevel protocol icmpv6?
+	//is the transport layer protocol icmpv6?
 	if(dynamic_cast<ICMPv6Message*>(encapsulated) != null)
 	{
 #if DEBUG
@@ -545,7 +551,7 @@ list<cPacket*> _6lowpan::processIPv6Packet(IPv6Datagram* ipPacket, int gateIndex
 		if(dynamic_cast<IPv6RouterSolicitation*>(encapsulated) != null)
 		{
 #if DEBUG
-				printf("(ND: RS)\n");
+		    printf("(ND: RS)\n");
 #endif /* DEBUG */
 			/*
 			typedef struct uip_nd6_rs {
@@ -564,30 +570,31 @@ list<cPacket*> _6lowpan::processIPv6Packet(IPv6Datagram* ipPacket, int gateIndex
 				UIP_ND6_OPT_HDR_BUF->type = UIP_ND6_OPT_SLLAO;
 				UIP_ND6_OPT_HDR_BUF->len = UIP_ND6_OPT_LLAO_LEN >> 3;
 
-				// TODO ND-RouterSolicitation: check and switch to 48/64-Bit support
+				// ND-RouterSolicitation: check and switch between 48/64-Bit MAC addresses
 				uint8_t addr[8];
-#if DEBUG
 				if(rs->getSourceLinkLayerAddress().getFlagEui64() == true)
 				{
+#if DEBUG
 				    printf("(ND: RS) - getSourceLinkLayerAddress -> EUI-64 MAC\n");
-				}
+#endif /* DEBUG */
+				    for (uint8_t i = 0; i < MAC_ADDRESS_SIZE64; i++) {
+                        addr[i] = rs->getSourceLinkLayerAddress().getAddressByte(i);
+                    }
+				} /* if (SourceLinkLayerAddress == EUI-64) */
 				else
 				{
+#if DEBUG
 				    printf("(ND: RS) - getSourceLinkLayerAddress -> 48-Bit MAC\n");
-				}
 #endif /* DEBUG */
-				addr[0] = rs->getSourceLinkLayerAddress().getAddressByte(0);
-				addr[1] = rs->getSourceLinkLayerAddress().getAddressByte(1);
-				addr[2] = rs->getSourceLinkLayerAddress().getAddressByte(2);
-				addr[3] = rs->getSourceLinkLayerAddress().getAddressByte(3);
-				addr[4] = rs->getSourceLinkLayerAddress().getAddressByte(4);
-				addr[5] = rs->getSourceLinkLayerAddress().getAddressByte(5);
-				addr[6] = 0;
-				addr[7] = 0;
+				    for (uint8_t i = 0; i < MAC_ADDRESS_SIZE; i++) {
+                        addr[i] = rs->getSourceLinkLayerAddress().getAddressByte(i);
+                    }
+				} /* if (SourceLinkLayerAddress == EUI-48) */
+
 				memcpy((uint8_t*)UIP_ND6_OPT_HDR_BUF + UIP_ND6_OPT_DATA_OFFSET, addr, UIP_LLADDR_LEN);
 
 				uip_len += UIP_ND6_OPT_LLAO_LEN;
-				nd6_opt_offset += UIP_ND6_OPT_LLAO_LEN;//optional extension length, used to calculate offset for optinal parts
+				nd6_opt_offset += UIP_ND6_OPT_LLAO_LEN;//optional extension length, used to calculate offset for optional parts
 			}
 		}
 		else if(dynamic_cast<IPv6RouterAdvertisement*>(encapsulated) != null)
@@ -645,26 +652,27 @@ list<cPacket*> _6lowpan::processIPv6Packet(IPv6Datagram* ipPacket, int gateIndex
 				UIP_ND6_OPT_HDR_BUF->type = UIP_ND6_OPT_SLLAO;
 				UIP_ND6_OPT_HDR_BUF->len = UIP_ND6_OPT_LLAO_LEN >> 3;
 
-				// TODO ND-RouteAnnouncement: switch to 48/64-Bit MAC address support
+				// ND-RouteAnnouncement: check and switch between 48/64-Bit MAC address support
 				uint8_t addr[8];
+				if(ra->getSourceLinkLayerAddress().getFlagEui64() == true)
+				{
 #if DEBUG
-                if(ra->getSourceLinkLayerAddress().getFlagEui64() == true)
-                {
-                    printf("(ND: RA) - getSourceLinkLayerAddress -> EUI-64 MAC\n");
-                }
-                else
-                {
-                    printf("(ND: RA) - getSourceLinkLayerAddress -> 48-Bit MAC\n");
-                }
+				    printf("(ND: RA) - getSourceLinkLayerAddress -> EUI-64 MAC\n");
 #endif /* DEBUG */
-				addr[0] = ra->getSourceLinkLayerAddress().getAddressByte(0);
-				addr[1] = ra->getSourceLinkLayerAddress().getAddressByte(1);
-				addr[2] = ra->getSourceLinkLayerAddress().getAddressByte(2);
-				addr[3] = ra->getSourceLinkLayerAddress().getAddressByte(3);
-				addr[4] = ra->getSourceLinkLayerAddress().getAddressByte(4);
-				addr[5] = ra->getSourceLinkLayerAddress().getAddressByte(5);
-				addr[6] = 0;
-				addr[7] = 0;
+				    for (uint8_t i = 0; i < MAC_ADDRESS_SIZE64; i++) {
+				        addr[i] = ra->getSourceLinkLayerAddress().getAddressByte(i);
+				    }
+				} /* if (SourceLinkLayerAddress == EUI-64) */
+				else
+				{
+#if DEBUG
+				    printf("(ND: RA) - getSourceLinkLayerAddress -> 48-Bit MAC\n");
+#endif /* DEBUG */
+				    for (uint8_t i = 0; i < MAC_ADDRESS_SIZE; i++) {
+				        addr[i] = ra->getSourceLinkLayerAddress().getAddressByte(i);
+				    }
+				} /* if (SourceLinkLayerAddress == EUI-48) */
+
 				memcpy((uint8_t*)UIP_ND6_OPT_HDR_BUF + UIP_ND6_OPT_DATA_OFFSET, addr, UIP_LLADDR_LEN);
 
 				uip_len += UIP_ND6_OPT_LLAO_LEN;
@@ -746,26 +754,27 @@ list<cPacket*> _6lowpan::processIPv6Packet(IPv6Datagram* ipPacket, int gateIndex
 				UIP_ND6_OPT_HDR_BUF->type = UIP_ND6_OPT_SLLAO;
 				UIP_ND6_OPT_HDR_BUF->len = UIP_ND6_OPT_LLAO_LEN >> 3;
 
-				// TODO ND-NeighborSolicitation -> Switch to 48/64-Bit MAC Address support
+				// ND-NeighborSolicitation -> Check and switch between 48/64-Bit MAC Address support
 				uint8_t addr[8];
+				if(ns->getSourceLinkLayerAddress().getFlagEui64() == true)
+				{
 #if DEBUG
-                if(ns->getSourceLinkLayerAddress().getFlagEui64() == true)
-                {
-                    printf("(ND: NS) - getSourceLinkLayerAddress -> EUI-64 MAC\n");
-                }
-                else
-                {
-                    printf("(ND: NS) - getSourceLinkLayerAddress -> 48-Bit MAC\n");
-                }
+				    printf("(ND: NS) - getSourceLinkLayerAddress -> EUI-64 MAC\n");
 #endif /* DEBUG */
-				addr[0] = ns->getSourceLinkLayerAddress().getAddressByte(0);
-				addr[1] = ns->getSourceLinkLayerAddress().getAddressByte(1);
-				addr[2] = ns->getSourceLinkLayerAddress().getAddressByte(2);
-				addr[3] = ns->getSourceLinkLayerAddress().getAddressByte(3);
-				addr[4] = ns->getSourceLinkLayerAddress().getAddressByte(4);
-				addr[5] = ns->getSourceLinkLayerAddress().getAddressByte(5);
-				addr[6] = 0;
-				addr[7] = 0;
+				    for (uint8_t i = 0; i < MAC_ADDRESS_SIZE64; i++) {
+				        addr[i] = ns->getSourceLinkLayerAddress().getAddressByte(i);
+				    }
+				} /* if (SourceLinkLayerAddress == EUI-64) */
+				else
+				{
+#if DEBUG
+				    printf("(ND: NS) - getSourceLinkLayerAddress -> 48-Bit MAC\n");
+#endif /* DEBUG */
+				    for (uint8_t i = 0; i < MAC_ADDRESS_SIZE; i++) {
+				        addr[i] = ns->getSourceLinkLayerAddress().getAddressByte(i);
+				    }
+				} /* if (SourceLinkLayerAddress == EUI-48) */
+
 				memcpy((uint8_t*)UIP_ND6_OPT_HDR_BUF + UIP_ND6_OPT_DATA_OFFSET, addr, UIP_LLADDR_LEN);
 
 				uip_len += UIP_ND6_OPT_LLAO_LEN;
@@ -813,26 +822,27 @@ list<cPacket*> _6lowpan::processIPv6Packet(IPv6Datagram* ipPacket, int gateIndex
 				UIP_ND6_OPT_HDR_BUF->type = UIP_ND6_OPT_TLLAO;
 				UIP_ND6_OPT_HDR_BUF->len = UIP_ND6_OPT_LLAO_LEN >> 3;
 
-				// TODO ND-NeighborAdvertisement -> Switch to 48/64-Bit MAC address support
+				// ND-NeighborAdvertisement -> Check and switch between 48/64-Bit MAC address support
 				uint8_t addr[8];
+				if(na->getTargetLinkLayerAddress().getFlagEui64() == true)
+				{
 #if DEBUG
-                if(na->getTargetLinkLayerAddress().getFlagEui64() == true)
-                {
-                    printf("(ND: NA) - getTargetLinkLayerAddress -> EUI-64 MAC\n");
-                }
-                else
-                {
-                    printf("(ND: NA) - getTargetLinkLayerAddress -> 48-Bit MAC\n");
-                }
+				    printf("(ND: NA) - getTargetLinkLayerAddress -> EUI-64 MAC\n");
 #endif /* DEBUG */
-				addr[0] = na->getTargetLinkLayerAddress().getAddressByte(0);
-				addr[1] = na->getTargetLinkLayerAddress().getAddressByte(1);
-				addr[2] = na->getTargetLinkLayerAddress().getAddressByte(2);
-				addr[3] = na->getTargetLinkLayerAddress().getAddressByte(3);
-				addr[4] = na->getTargetLinkLayerAddress().getAddressByte(4);
-				addr[5] = na->getTargetLinkLayerAddress().getAddressByte(5);
-				addr[6] = 0;
-				addr[7] = 0;
+				    for (uint8_t i = 0; i < MAC_ADDRESS_SIZE64; i++) {
+				        addr[i] = na->getTargetLinkLayerAddress().getAddressByte(i);
+				    }
+				} /* if (TargetLinkLayerAddress == EUI-64) */
+				else
+				{
+#if DEBUG
+				    printf("(ND: NA) - getTargetLinkLayerAddress -> 48-Bit MAC\n");
+#endif /* DEBUG */
+				    for (uint8_t i = 0; i < MAC_ADDRESS_SIZE; i++) {
+				        addr[i] = na->getTargetLinkLayerAddress().getAddressByte(i);
+				    }
+				} /* if (TargetLinkLayerAddress == EUI-48) */
+
 				memcpy((uint8_t*)UIP_ND6_OPT_HDR_BUF + UIP_ND6_OPT_DATA_OFFSET, addr, UIP_LLADDR_LEN);
 
 				uip_len += UIP_ND6_OPT_LLAO_LEN;
@@ -881,26 +891,27 @@ list<cPacket*> _6lowpan::processIPv6Packet(IPv6Datagram* ipPacket, int gateIndex
 				UIP_ND6_OPT_HDR_BUF->type = UIP_ND6_OPT_TLLAO;
 				UIP_ND6_OPT_HDR_BUF->len = UIP_ND6_OPT_LLAO_LEN >> 3;
 
-                // TODO ND-Redirect -> Switch to 48/64-Bit MAC address support
+				// ND-Redirect -> Check and switch between 48/64-Bit MAC address support
                 uint8_t addr[8];
+				if(redirect->getTargetLinkLayerAddress().getFlagEui64() == true)
+				{
 #if DEBUG
-                if(redirect->getTargetLinkLayerAddress().getFlagEui64() == true)
-                {
-                    printf("(ND: Redirect) - getSourceLinkLayerAddress -> EUI-64 MAC\n");
-                }
-                else
-                {
-                    printf("(ND: Redirect) - getSourceLinkLayerAddress -> 48-Bit MAC\n");
-                }
+				    printf("(ND: Redirect) - getTargetLinkLayerAddress -> EUI-64 MAC\n");
 #endif /* DEBUG */
-				addr[0] = redirect->getTargetLinkLayerAddress().getAddressByte(0);
-				addr[1] = redirect->getTargetLinkLayerAddress().getAddressByte(1);
-				addr[2] = redirect->getTargetLinkLayerAddress().getAddressByte(2);
-				addr[3] = redirect->getTargetLinkLayerAddress().getAddressByte(3);
-				addr[4] = redirect->getTargetLinkLayerAddress().getAddressByte(4);
-				addr[5] = redirect->getTargetLinkLayerAddress().getAddressByte(5);
-				addr[6] = 0;
-				addr[7] = 0;
+				    for (uint8_t i = 0; i < MAC_ADDRESS_SIZE64; i++) {
+				        addr[i] = redirect->getTargetLinkLayerAddress().getAddressByte(i);
+				    }
+				} /* if (SourceLinkLayerAddress == EUI-64) */
+				else
+				{
+#if DEBUG
+				    printf("(ND: Redirect) - getTargetLinkLayerAddress -> 48-Bit MAC\n");
+#endif /* DEBUG */
+				    for (uint8_t i = 0; i < MAC_ADDRESS_SIZE; i++) {
+				        addr[i] = redirect->getTargetLinkLayerAddress().getAddressByte(i);
+				    }
+				} /* if (SourceLinkLayerAddress == EUI-48) */
+
 				memcpy((uint8_t*)UIP_ND6_OPT_HDR_BUF + UIP_ND6_OPT_DATA_OFFSET, addr, UIP_LLADDR_LEN);
 
 				uip_len += UIP_ND6_OPT_LLAO_LEN;
@@ -909,6 +920,9 @@ list<cPacket*> _6lowpan::processIPv6Packet(IPv6Datagram* ipPacket, int gateIndex
 		}
 		else if(dynamic_cast<ICMPv6DestUnreachableMsg*>(icmpPacket) != null)
 		{
+#if DEBUG
+        printf("\tprocessing ICMPv6_DESTINATION_UNREACHABLE packet...\n");
+#endif /* DEBUG */
 			UIP_ICMP_BUF->type = ICMP6_DST_UNREACH;
 			switch(icmpPacket->getType())
 			{
@@ -938,11 +952,17 @@ list<cPacket*> _6lowpan::processIPv6Packet(IPv6Datagram* ipPacket, int gateIndex
 		}
 		else if(dynamic_cast<ICMPv6PacketTooBigMsg*>(icmpPacket) != null)
 		{
+#if DEBUG
+        printf("\tprocessing ICMPv6_PACKET_TOO_BIG packet...\n");
+#endif /* DEBUG */
 			UIP_ICMP_BUF->type = ICMP6_PACKET_TOO_BIG;
 			UIP_ICMP_BUF->icode = 0;
 		}
 		else if(dynamic_cast<ICMPv6TimeExceededMsg*>(icmpPacket) != null)
 		{
+#if DEBUG
+        printf("\tprocessing ICMPv6_TIME_EXCEEDED packet...\n");
+#endif /* DEBUG */
 			UIP_ICMP_BUF->type = ICMP6_TIME_EXCEEDED;
 			switch(icmpPacket->getType())
 			{
@@ -962,7 +982,10 @@ list<cPacket*> _6lowpan::processIPv6Packet(IPv6Datagram* ipPacket, int gateIndex
 		}
 		else if(dynamic_cast<ICMPv6ParamProblemMsg*>(icmpPacket) != null)
 		{
-			UIP_ICMP_BUF->type = ICMP6_PARAM_PROB;
+#if DEBUG
+        printf("\tprocessing ICMPv6_PARAMETER_PROBLEM packet...\n");
+#endif /* DEBUG */
+		    UIP_ICMP_BUF->type = ICMP6_PARAM_PROB;
 			switch(icmpPacket->getType())
 			{
 				case ERROREOUS_HDR_FIELD:
@@ -986,17 +1009,23 @@ list<cPacket*> _6lowpan::processIPv6Packet(IPv6Datagram* ipPacket, int gateIndex
 		}
 		else if(dynamic_cast<ICMPv6EchoRequestMsg*>(icmpPacket) != null)
 		{
-			UIP_ICMP_BUF->type = ICMP6_ECHO_REQUEST;
+#if DEBUG
+        printf("\tprocessing ICMPv6_ECHO_REQUEST packet...\n");
+#endif /* DEBUG */
+		    UIP_ICMP_BUF->type = ICMP6_ECHO_REQUEST;
 			UIP_ICMP_BUF->icode = ((ICMPv6EchoRequestMsg*)icmpPacket)->getCode();
 		}
 		else if(dynamic_cast<ICMPv6EchoReplyMsg*>(icmpPacket) != null)
 		{
+#if DEBUG
+        printf("\tprocessing ICMPv6_ECHO_REPLY packet...\n");
+#endif /* DEBUG */
 			UIP_ICMP_BUF->type = ICMP6_ECHO_REPLY;
 			UIP_ICMP_BUF->icode = ((ICMPv6EchoReplyMsg*)icmpPacket)->getCode();
 		}
+
 		UIP_ICMP_BUF->icmpchksum = 0;
 		UIP_ICMP_BUF->icmpchksum = ~uip_icmp6chksum();
-
 	}
 	else if(dynamic_cast<UDPPacket*>(encapsulated) != null)
 	{
@@ -1165,7 +1194,7 @@ list<cPacket*> _6lowpan::processIPv6Packet(IPv6Datagram* ipPacket, int gateIndex
 		if(tcpPacket->getPayloadLength() > 0 || tcpPacket->getEncapsulatedPacket() != null)
 		{
 			uint16_t length;
-			//TODO what to do if payload length bigger than contikis? now: just cut length!
+			// TODO what to do if payload length bigger than contikis? now: just cut length!
 			if(tcpPacket->getPayloadLength() > UIP_TCP_MSS)
 				length = UIP_TCP_MSS;
 			else
@@ -1196,21 +1225,18 @@ list<cPacket*> _6lowpan::processIPv6Packet(IPv6Datagram* ipPacket, int gateIndex
 	UIP_IP_BUF->len[1] = (u8_t)((uip_len - 40) & 0x00FF);
 
 	// Get next hops link layer address
-	RoutingTable6* rt6 = RoutingTable6Access().get();
-	IPv6Address nextHop = rt6->lookupDestCache(ipPacket->getDestAddress(), configuration[gateIndex]->interfaceId);
-	IPv6NeighbourDiscovery* nd = IPv6NeighbourDiscoveryAccess().get();
-	MACAddress mac = nd->resolveNeighbour(nextHop, configuration[gateIndex]->interfaceId);
+	RoutingTable6* rt6          = RoutingTable6Access().get();
+	IPv6Address nextHop         = rt6->lookupDestCache(ipPacket->getDestAddress(), configuration[gateIndex]->interfaceId);
+	IPv6NeighbourDiscovery* nd  = IPv6NeighbourDiscoveryAccess().get();
+	MACAddress macNextHop       = nd->resolveNeighbour(nextHop, configuration[gateIndex]->interfaceId);
 
-	// TODO switch to 48/64-Bit MAC address support
-	uip_lladdr_t* addr = new uip_lladdr_t();
-	addr->addr[0] = mac.getAddressByte(0);
-	addr->addr[1] = mac.getAddressByte(1);
-	addr->addr[2] = mac.getAddressByte(2);
-	addr->addr[3] = mac.getAddressByte(3);
-	addr->addr[4] = mac.getAddressByte(4);
-	addr->addr[5] = mac.getAddressByte(5);
+	uip_lladdr_t* addr          = new uip_lladdr_t();
+	// Check for 48/64-Bit MAC address and enter the correct address size
+	for (uint8_t i = 0; i < macNextHop.getAddressSize(); i++) {
+	    addr->addr[i] = macNextHop.getAddressByte(i);
+	}
 
-	// par - localdest, the MAC address of the destination (next hop)
+	// par - localdest, the 48/64-Bit MAC address of the destination (next hop)
 	tcpip_output(addr);
 
 	printf("\tContiki is done, packets in queue: %i\n", packetQueue.size());
@@ -1277,11 +1303,12 @@ IPv6Datagram* _6lowpan::processLowpanPacket(_6lowpanDatagram* packet)
 	// Call Contiki to take care of the packet processing
 	NETSTACK_NETWORK.input();
 
-#if DEBUG
 	// This source code is taken from Contiki, it simply checks the packets status
 	// It is used to figure out what Contiki did with the packet
 	// First check for reassemble mode
-	printf("\tChecking for reassembly mode\n");
+#if DEBUG
+	printf("\tChecking for reassembling mode\n");
+#endif /* DEBUG */
 	if(rime_ptr == null)
 		error("rime_ptr is null, did u forget to make it global accessible in Contiki? (i.e., remove the static)");
 	if(processed_ip_len > 0)
@@ -1294,7 +1321,9 @@ IPv6Datagram* _6lowpan::processLowpanPacket(_6lowpanDatagram* packet)
 				(frag_size != sicslowpan_len || reass_tag  != frag_tag || !rimeaddr_cmp(&frag_sender, packetbuf_addr(PACKETBUF_ADDR_SENDER))))
 				||
 				frag_size == 0) {
-			printf("\tdropping packet not part of reessembly process\n");
+#if DEBUG
+			printf("\tdropping packet not part of reassembling process\n");
+#endif /* DEBUG */
 			delete packet;
 			return null;
 		}
@@ -1302,11 +1331,12 @@ IPv6Datagram* _6lowpan::processLowpanPacket(_6lowpanDatagram* packet)
 	// If in reassemble mode then drop / delete the packet
 	if(!(processed_ip_len == 0 || processed_ip_len == sicslowpan_len))
 	{
-		printf("\treceived packet in reassembly mode, no further processing (processed_ip_len: %i, sicslowpan_len: %i)\n", processed_ip_len, sicslowpan_len);
+#if DEBUG
+		printf("\treceived packet in reassembling mode, no further processing (processed_ip_len: %i, sicslowpan_len: %i)\n", processed_ip_len, sicslowpan_len);
+#endif /* DEBUG */
 		delete packet;
 		return null;
 	}
-#endif /* DEBUG */
 
 	/* IP header
 	struct uip_ip_hdr {
@@ -1325,16 +1355,16 @@ IPv6Datagram* _6lowpan::processLowpanPacket(_6lowpanDatagram* packet)
 
 	IPv6Address srcAddress;
 	srcAddress.set(uip_ntohl(UIP_IP_BUF->srcipaddr.u16[0] | UIP_IP_BUF->srcipaddr.u16[1] << 16),
-				uip_ntohl(UIP_IP_BUF->srcipaddr.u16[2] | UIP_IP_BUF->srcipaddr.u16[3] << 16),
-				uip_ntohl(UIP_IP_BUF->srcipaddr.u16[4] | UIP_IP_BUF->srcipaddr.u16[5] << 16),
-				uip_ntohl(UIP_IP_BUF->srcipaddr.u16[6] | UIP_IP_BUF->srcipaddr.u16[7] << 16));
+				   uip_ntohl(UIP_IP_BUF->srcipaddr.u16[2] | UIP_IP_BUF->srcipaddr.u16[3] << 16),
+				   uip_ntohl(UIP_IP_BUF->srcipaddr.u16[4] | UIP_IP_BUF->srcipaddr.u16[5] << 16),
+				   uip_ntohl(UIP_IP_BUF->srcipaddr.u16[6] | UIP_IP_BUF->srcipaddr.u16[7] << 16));
 	ipPacket->setSrcAddress(srcAddress);
 
 	IPv6Address destAddress;
 	destAddress.set(uip_ntohl(UIP_IP_BUF->destipaddr.u16[0] | UIP_IP_BUF->destipaddr.u16[1] << 16),
-				uip_ntohl(UIP_IP_BUF->destipaddr.u16[2] | UIP_IP_BUF->destipaddr.u16[3] << 16),
-				uip_ntohl(UIP_IP_BUF->destipaddr.u16[4] | UIP_IP_BUF->destipaddr.u16[5] << 16),
-				uip_ntohl(UIP_IP_BUF->destipaddr.u16[6] | UIP_IP_BUF->destipaddr.u16[7] << 16));
+				    uip_ntohl(UIP_IP_BUF->destipaddr.u16[2] | UIP_IP_BUF->destipaddr.u16[3] << 16),
+				    uip_ntohl(UIP_IP_BUF->destipaddr.u16[4] | UIP_IP_BUF->destipaddr.u16[5] << 16),
+				    uip_ntohl(UIP_IP_BUF->destipaddr.u16[6] | UIP_IP_BUF->destipaddr.u16[7] << 16));
 	ipPacket->setDestAddress(destAddress);
 
 	if(UIP_IP_BUF->proto == UIP_PROTO_ICMP6)
@@ -1365,19 +1395,19 @@ IPv6Datagram* _6lowpan::processLowpanPacket(_6lowpanDatagram* packet)
 				//SLLAO
 				if(UIP_ND6_OPT_HDR_BUF->type == UIP_ND6_OPT_SLLAO)
 				{
-					// TODO ND-RouterSolicitation -> Switch to 48/64-Bit MAC address support
+					// ND-RouterSolicitation
 				    MACAddress mac;
-					mac.setAddressByte(0, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET]);
-					mac.setAddressByte(1, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + 1]);
-					mac.setAddressByte(2, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + 2]);
-					mac.setAddressByte(3, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + 3]);
-					mac.setAddressByte(4, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + 4]);
-					mac.setAddressByte(5, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + 5]);
-					((IPv6RouterSolicitation*)encapsulate)->setSourceLinkLayerAddress(mac);
+			        // Contiki's ND-module uses EUI-64 MAC addresses
+				    mac.setFlagEui64(true);
+			        for (uint8_t i = 0; i < MAC_ADDRESS_SIZE64; i++) {
+			            mac.setAddressByte(i, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + i]);
+				    }
+
+				    ((IPv6RouterSolicitation*)encapsulate)->setSourceLinkLayerAddress(mac);
 					nd6_opt_offset += UIP_ND6_OPT_LLAO_LEN;
 				}
 				else
-					error("ND option which is not allowed");
+					error("ND option which is not allowed\n");
 			}
 		}
 		else if(UIP_ICMP_BUF->type == ICMP6_RA)
@@ -1416,14 +1446,14 @@ IPv6Datagram* _6lowpan::processLowpanPacket(_6lowpanDatagram* packet)
 				else if(UIP_ND6_OPT_HDR_BUF->type == UIP_ND6_OPT_SLLAO)
 				{
 					//SLLO
-					MACAddress mac;
-					// TODO ND-RouterAdvertisement -> Switch to 48/64-Bit MAC address support
-					mac.setAddressByte(0, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET]);
-					mac.setAddressByte(1, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + 1]);
-					mac.setAddressByte(2, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + 2]);
-					mac.setAddressByte(3, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + 3]);
-					mac.setAddressByte(4, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + 4]);
-					mac.setAddressByte(5, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + 5]);
+					// ND-RouterAdvertisement
+                    MACAddress mac;
+                    // Contiki's ND-module uses EUI-64 MAC addresses
+                    mac.setFlagEui64(true);
+                    for (uint8_t i = 0; i < MAC_ADDRESS_SIZE64; i++) {
+                        mac.setAddressByte(i, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + i]);
+                    }
+
 					((IPv6RouterAdvertisement*)encapsulate)->setSourceLinkLayerAddress(mac);
 					nd6_opt_offset += UIP_ND6_OPT_LLAO_LEN;
 				}
@@ -1447,7 +1477,7 @@ IPv6Datagram* _6lowpan::processLowpanPacket(_6lowpanDatagram* packet)
 					nd6_opt_offset += UIP_ND6_OPT_PREFIX_INFO_LEN;
 				}
 				else
-					error("ND option which is not allowed");
+					error("ND option which is not allowed\n");
 			}
 		}
 		else if(UIP_ICMP_BUF->type == ICMP6_NS)
@@ -1466,9 +1496,9 @@ IPv6Datagram* _6lowpan::processLowpanPacket(_6lowpanDatagram* packet)
 				 */
 			IPv6Address addr;
 			addr.set(uip_ntohl(UIP_ND6_NS_BUF->tgtipaddr.u16[0] | UIP_ND6_NS_BUF->tgtipaddr.u16[1] << 16),
-						uip_ntohl(UIP_ND6_NS_BUF->tgtipaddr.u16[2] | UIP_ND6_NS_BUF->tgtipaddr.u16[3] << 16),
-						uip_ntohl(UIP_ND6_NS_BUF->tgtipaddr.u16[4] | UIP_ND6_NS_BUF->tgtipaddr.u16[5] << 16),
-						uip_ntohl(UIP_ND6_NS_BUF->tgtipaddr.u16[6] | UIP_ND6_NS_BUF->tgtipaddr.u16[7] << 16));
+					 uip_ntohl(UIP_ND6_NS_BUF->tgtipaddr.u16[2] | UIP_ND6_NS_BUF->tgtipaddr.u16[3] << 16),
+					 uip_ntohl(UIP_ND6_NS_BUF->tgtipaddr.u16[4] | UIP_ND6_NS_BUF->tgtipaddr.u16[5] << 16),
+					 uip_ntohl(UIP_ND6_NS_BUF->tgtipaddr.u16[6] | UIP_ND6_NS_BUF->tgtipaddr.u16[7] << 16));
 			((IPv6NeighbourSolicitation*)encapsulate)->setTargetAddress(addr);
 
 			if(uip_len > UIP_IPH_LEN + UIP_ICMPH_LEN + nd6_opt_offset)
@@ -1478,18 +1508,18 @@ IPv6Datagram* _6lowpan::processLowpanPacket(_6lowpanDatagram* packet)
 				{
 					//nd6_opt_offset += UIP_ND6_OPT_HDR_BUF;
 					MACAddress mac;
-					// TODO ND-NeighborSolicitation -> Switch to 48/64-Bit MAC address support
-					mac.setAddressByte(0, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET]);
-					mac.setAddressByte(1, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + 1]);
-					mac.setAddressByte(2, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + 2]);
-					mac.setAddressByte(3, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + 3]);
-					mac.setAddressByte(4, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + 4]);
-					mac.setAddressByte(5, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + 5]);
+					// ND-NeighborSolicitation
+					// Contiki's ND-module uses EUI-64 MAC addresses
+					mac.setFlagEui64(true);
+					for (uint8_t i = 0; i < MAC_ADDRESS_SIZE64; i++) {
+					    mac.setAddressByte(i, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + i]);
+					}
+
 					((IPv6NeighbourSolicitation*)encapsulate)->setSourceLinkLayerAddress(mac);
 					nd6_opt_offset += UIP_ND6_OPT_LLAO_LEN;
 				}
 				else
-					error("ND option which is not allowed");
+					error("ND option which is not allowed\n");
 			}
 		}
 		else if(UIP_ICMP_BUF->type == ICMP6_NA)
@@ -1523,18 +1553,18 @@ IPv6Datagram* _6lowpan::processLowpanPacket(_6lowpanDatagram* packet)
 				if(UIP_ND6_OPT_HDR_BUF->type == UIP_ND6_OPT_TLLAO)
 				{
 					MACAddress mac;
-					// TODO ND-NeighborAdvertisement -> Switch to 48/64-Bit MAC address support
-					mac.setAddressByte(0, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET]);
-					mac.setAddressByte(1, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + 1]);
-					mac.setAddressByte(2, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + 2]);
-					mac.setAddressByte(3, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + 3]);
-					mac.setAddressByte(4, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + 4]);
-					mac.setAddressByte(5, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + 5]);
+					// ND-NeighborAdvertisement
+                    // Contiki's ND-module uses EUI-64 MAC addresses
+                    mac.setFlagEui64(true);
+                    for (uint8_t i = 0; i < MAC_ADDRESS_SIZE64; i++) {
+                        mac.setAddressByte(i, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + i]);
+                    }
+
 					((IPv6NeighbourAdvertisement*)encapsulate)->setTargetLinkLayerAddress(mac);
 					nd6_opt_offset += UIP_ND6_OPT_LLAO_LEN;
 				}
 				else
-					error("ND option which is not allowed");
+					error("ND option which is not allowed\n");
 			}
 		}
 		else if(UIP_ICMP_BUF->type == ICMP6_REDIRECT)
@@ -1554,15 +1584,15 @@ IPv6Datagram* _6lowpan::processLowpanPacket(_6lowpanDatagram* packet)
 			*/
 
 			IPv6Address t_addr(UIP_ND6_REDIRECT_BUF->tgtipaddress.u16[0] << 16 | UIP_ND6_REDIRECT_BUF->tgtipaddress.u16[1],
-					UIP_ND6_REDIRECT_BUF->tgtipaddress.u16[2] << 16 | UIP_ND6_REDIRECT_BUF->tgtipaddress.u16[3],
-					UIP_ND6_REDIRECT_BUF->tgtipaddress.u16[4] << 16 | UIP_ND6_REDIRECT_BUF->tgtipaddress.u16[5],
-					UIP_ND6_REDIRECT_BUF->tgtipaddress.u16[6] << 16 | UIP_ND6_REDIRECT_BUF->tgtipaddress.u16[7]);
+					           UIP_ND6_REDIRECT_BUF->tgtipaddress.u16[2] << 16 | UIP_ND6_REDIRECT_BUF->tgtipaddress.u16[3],
+					           UIP_ND6_REDIRECT_BUF->tgtipaddress.u16[4] << 16 | UIP_ND6_REDIRECT_BUF->tgtipaddress.u16[5],
+					           UIP_ND6_REDIRECT_BUF->tgtipaddress.u16[6] << 16 | UIP_ND6_REDIRECT_BUF->tgtipaddress.u16[7]);
 			((IPv6Redirect*)encapsulate)->setTargetAddress(t_addr);
 
 			IPv6Address d_addr(UIP_ND6_REDIRECT_BUF->destipaddress.u16[0] << 16 | UIP_ND6_REDIRECT_BUF->destipaddress.u16[1],
-					UIP_ND6_REDIRECT_BUF->destipaddress.u16[2] << 16 | UIP_ND6_REDIRECT_BUF->destipaddress.u16[3],
-					UIP_ND6_REDIRECT_BUF->destipaddress.u16[4] << 16 | UIP_ND6_REDIRECT_BUF->destipaddress.u16[5],
-					UIP_ND6_REDIRECT_BUF->destipaddress.u16[6] << 16 | UIP_ND6_REDIRECT_BUF->destipaddress.u16[7]);
+					           UIP_ND6_REDIRECT_BUF->destipaddress.u16[2] << 16 | UIP_ND6_REDIRECT_BUF->destipaddress.u16[3],
+                               UIP_ND6_REDIRECT_BUF->destipaddress.u16[4] << 16 | UIP_ND6_REDIRECT_BUF->destipaddress.u16[5],
+                               UIP_ND6_REDIRECT_BUF->destipaddress.u16[6] << 16 | UIP_ND6_REDIRECT_BUF->destipaddress.u16[7]);
 			((IPv6Redirect*)encapsulate)->setDestinationAddress(d_addr);
 
 			if(uip_len > UIP_IPH_LEN + UIP_ICMPH_LEN + nd6_opt_offset)
@@ -1571,21 +1601,24 @@ IPv6Datagram* _6lowpan::processLowpanPacket(_6lowpanDatagram* packet)
 				if(UIP_ND6_OPT_HDR_BUF->type == UIP_ND6_OPT_TLLAO)
 				{
 					MACAddress mac;
-					// TODO ND-Redirect -> Switch to 48/64-Bit MAC address support
-					mac.setAddressByte(0, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET]);
-					mac.setAddressByte(1, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + 1]);
-					mac.setAddressByte(2, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + 2]);
-					mac.setAddressByte(3, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + 3]);
-					mac.setAddressByte(4, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + 4]);
-					mac.setAddressByte(5, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + 5]);
+					// ND-Redirect
+					// Contiki's ND-module uses EUI-64 MAC addresses
+					mac.setFlagEui64(true);
+					for (uint8_t i = 0; i < MAC_ADDRESS_SIZE64; i++) {
+					    mac.setAddressByte(i, ((uint8_t*)UIP_ND6_OPT_HDR_BUF)[UIP_ND6_OPT_DATA_OFFSET + i]);
+					}
+
 					((IPv6Redirect*)encapsulate)->setTargetLinkLayerAddress(mac);
 					nd6_opt_offset += UIP_ND6_OPT_LLAO_LEN;
 				}
-				error("ND option which is not allowed");
+				error("ND option which is not allowed\n");
 			}
 		}
 		else if(UIP_ICMP_BUF->type == ICMP6_DST_UNREACH)
 		{
+#if DEBUG
+            printf("\tprocessLowpanPacket: ICMPv6_DESTINATION_UNREACHABLE\n");
+#endif /* DEBUG */
 			encapsulate = new ICMPv6DestUnreachableMsg(packet->getName());
 			switch(UIP_ICMP_BUF->icode)
 			{
@@ -1615,10 +1648,17 @@ IPv6Datagram* _6lowpan::processLowpanPacket(_6lowpanDatagram* packet)
 		}
 		else if(UIP_ICMP_BUF->type == ICMP6_PACKET_TOO_BIG)
 		{
+#if DEBUG
+            printf("\tprocessLowpanPacket: ICMPv6_PACKET_TOO_BIG\n");
+#endif /* DEBUG */
 			encapsulate = new ICMPv6PacketTooBigMsg(packet->getName());
+			encapsulate->setType(ICMPv6_PACKET_TOO_BIG);
 		}
 		else if(UIP_ICMP_BUF->type == ICMP6_TIME_EXCEEDED)
 		{
+#if DEBUG
+            printf("\tprocessLowpanPacket: ICMPv6_TIME_EXCEEDED\n");
+#endif /* DEBUG */
 			encapsulate = new ICMPv6TimeExceededMsg(packet->getName());
 			switch(UIP_ICMP_BUF->icode)
 			{
@@ -1638,6 +1678,9 @@ IPv6Datagram* _6lowpan::processLowpanPacket(_6lowpanDatagram* packet)
 		}
 		else if(UIP_ICMP_BUF->type == ICMP6_PARAM_PROB)
 		{
+#if DEBUG
+            printf("\tprocessLowpanPacket: ICMPv6_PARAMETER_PROBLEM\n");
+#endif /* DEBUG */
 			encapsulate = new ICMPv6ParamProblemMsg(packet->getName());
 			switch(UIP_ICMP_BUF->icode)
 			{
@@ -1662,13 +1705,21 @@ IPv6Datagram* _6lowpan::processLowpanPacket(_6lowpanDatagram* packet)
 		}
 		else if(UIP_ICMP_BUF->type == ICMP6_ECHO_REQUEST)
 		{
+#if DEBUG
+            printf("\tprocessLowpanPacket: ICMPv6_ECHO_REQUEST\n");
+#endif /* DEBUG */
 			encapsulate = new ICMPv6EchoRequestMsg(packet->getName());
 			((ICMPv6EchoRequestMsg*)encapsulate)->setCode(UIP_ICMP_BUF->icode);
+			encapsulate->setType(ICMPv6_ECHO_REQUEST);
 		}
 		else if(UIP_ICMP_BUF->type == ICMP6_ECHO_REPLY)
 		{
+#if DEBUG
+            printf("\tprocessLowpanPacket: ICMPv6_ECHO_REPLY\n");
+#endif /* DEBUG */
 			encapsulate = new ICMPv6EchoReplyMsg(packet->getName());
 			((ICMPv6EchoReplyMsg*)encapsulate)->setCode(UIP_ICMP_BUF->icode);
+			encapsulate->setType(ICMPv6_ECHO_REPLY);
 		}
 
 		encapsulate->setKind(packet->getTransportMessageKind());
@@ -1680,7 +1731,7 @@ IPv6Datagram* _6lowpan::processLowpanPacket(_6lowpanDatagram* packet)
 	}else if(UIP_IP_BUF->proto == UIP_PROTO_UDP)
 	{
 #if DEBUG
-		printf("\tprocessing UDP packet\n");
+		printf("\tprocessLowpanPacket: processing UDP packet\n");
 #endif /* DEBUG */
 		ipPacket->setTransportProtocol(IP_PROT_UDP);
 
@@ -1802,14 +1853,14 @@ IPv6Datagram* _6lowpan::processLowpanPacket(_6lowpanDatagram* packet)
 						break;
 					}
 					default:
-						error("Unsupported TCP option field.");
+						error("Unsupported TCP option field.\n");
 					}
 				encapsulate->setOptionsArraySize(encapsulate->getOptionsArraySize() + 1);
 				encapsulate->setOptions(encapsulate->getOptionsArraySize() - 1, opt);
 			}
 		}
 #if DEBUG
-		printf("\tprocessing TCP packet uip_len: %i(%i)\n", uip_len, UIP_IPH_LEN + ((UIP_TCP_BUF->tcpoffset >> 4) * 4));
+		printf("\tprocessLowpanPacket: processing TCP packet uip_len: %i(%i)\n", uip_len, UIP_IPH_LEN + ((UIP_TCP_BUF->tcpoffset >> 4) * 4));
 		if(uip_len > UIP_IPH_LEN + ((UIP_TCP_BUF->tcpoffset >> 4) * 4))
 			printf("\tretr payload: %s\n", (char*)(UIP_IP_BUF + ((UIP_TCP_BUF->tcpoffset >> 4) * 4)));
 #endif /* DEBUG */
