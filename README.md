@@ -6,7 +6,7 @@ This repository contains the [*Integrate It Yourself*](#integrate-it-yourself) v
 
 ## Integrate It Yourself ##
 
-*Integrate It Yourself Version* means that you have to perform the integration of the model in OMNeT++ / INET / INETMANET / Contiki step-by-step by yourself (therefore DIY). An installation and configuration tutorial can be found on [the model's webpage](https://www-rnks.informatik.tu-cottbus.de/~6lowpan4omnet) and at the [Wiki page on Github](https://github.com/michaelkirsche/6lowpan4omnet-diy/wiki).
+*Integrate It Yourself Version* means that you have to perform the integration of the model in OMNeT++ / INET / INETMANET / Contiki step-by-step by yourself (therefore DIY). An installation and configuration tutorial can be found at the [Wiki page on Github](https://github.com/michaelkirsche/6lowpan4omnet-diy/wiki), along with answers to [frequency asked questions](https://github.com/michaelkirsche/6lowpan4omnet-diy/wiki/FAQ).
 
 
 ## Directory Structure ##
@@ -21,19 +21,17 @@ The directory structure reflects the integration steps, refer to the instruction
 
 ## Releases ##
 
-Releases and updates will be published in this Github repository in the *Integrate It Yourself* version and in [the *Clone It Yourself* version](https://www-rnks.informatik.tu-cottbus.de/en/node/1445) in the according branches of [my INET/INETMANET and Contiki clones](https://github.com/michaelkirsche).
-
-Support for the initial release is ceased. You can find the download link and installation instructions on [the old model's webpage](https://www-rnks.informatik.tu-cottbus.de/~6lowpan4omnet).
+Releases are published in this Github repository in the *Integrate It Yourself* version and in [the *Clone It Yourself* version](https://github.com/michaelkirsche/6lowpan4omnet-diy/wiki/Clone-It-Yourself-Version) in the according branches of [my INET/INETMANET and Contiki clones](https://github.com/michaelkirsche).
 
 
 ## Publication ##
 
 If you are interested in background information, please refer to the following publication:
 
- * Kirsche, M.; Hartwig, J.: [*A 6LoWPAN Model for OMNeT++*](https://www-rnks.informatik.tu-cottbus.de/content/unrestricted/staff/mk/Publications/SIMUTools_2013-OMNeT-Kirsche_Hartwig.pdf), in Proceedings of the [6th International OMNeT++ Workshop](http://www.omnet-workshop.org/2013/), co-located with the [6th International ICST Conference on Simulation Tools and Techniques (SIMUTools 2013)](http://www.simutools.org/2013), March 2013. 
+ * Kirsche, M.; Hartwig, J.: [*A 6LoWPAN Model for OMNeT++*](http://www-docs.tu-cottbus.de/rechnernetze/public/staff/mkirsche/publications/SIMUTools_2013-OMNeT-Kirsche_Hartwig.pdf), in Proceedings of the [6th International OMNeT++ Workshop](https://workshop.omnetpp.org/2013/), co-located with the [6th International ICST Conference on Simulation Tools and Techniques (SIMUTools 2013)](http://simutools.org/2013/), March 2013. 
 
 
 ## Contributors ##
 
- * &copy; Michael Kirsche [<michael.kirsche@tu-cottbus.de>]
+ * &copy; Michael Kirsche (michael.kirsche(at)b-tu.de)
  * Jonas Hartwig
