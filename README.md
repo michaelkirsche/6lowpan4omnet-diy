@@ -28,7 +28,7 @@ Releases are published in this Github repository in the *Integrate It Yourself* 
 
 If you are interested in background information, please refer to the following publication:
 
- * Kirsche, M.; Hartwig, J.: [*A 6LoWPAN Model for OMNeT++*](http://www-docs.tu-cottbus.de/rechnernetze/public/staff/mkirsche/publications/SIMUTools_2013-OMNeT-Kirsche_Hartwig.pdf), in Proceedings of the [6th International OMNeT++ Workshop](https://workshop.omnetpp.org/2013/), co-located with the [6th International ICST Conference on Simulation Tools and Techniques (SIMUTools 2013)](http://simutools.org/2013/), March 2013. 
+ * Kirsche, M.; Hartwig, J.: [*A 6LoWPAN Model for OMNeT++*](https://www-docs.b-tu.de/fg-rechnernetze/public/staff/mkirsche/publications/SIMUTools_2013-OMNeT-Kirsche_Hartwig.pdf), in Proceedings of the [6th International OMNeT++ Workshop](https://summit.omnetpp.org/archive/2013/), co-located with the [6th International ICST Conference on Simulation Tools and Techniques (SIMUTools 2013)](http://simutools.org/2013/), March 2013. 
 
 
 ## Contributors ##
