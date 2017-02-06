@@ -33,5 +33,5 @@ If you are interested in background information, please refer to the following p
 
 ## Contributors ##
 
- * &copy; Michael Kirsche (michael.kirsche(at)b-tu.de)
+ * &copy; [Michael Kirsche](https://github.com/michaelkirsche)
  * Jonas Hartwig
